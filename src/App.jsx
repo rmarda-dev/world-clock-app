@@ -11,7 +11,6 @@ export default function App() {
   ]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCityName, setNewCityName] = useState('');
-  const [newCityTimezone, setNewCityTimezone] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -25,39 +24,112 @@ export default function App() {
     setCities(cities.filter(city => city.id !== cityId));
   };
 
+  // City to timezone mapping
+  const cityTimezoneMap = {
+    // North America
+    'new york': 'America/New_York',
+    'los angeles': 'America/Los_Angeles',
+    'chicago': 'America/Chicago',
+    'houston': 'America/Chicago',
+    'phoenix': 'America/Phoenix',
+    'philadelphia': 'America/New_York',
+    'san antonio': 'America/Chicago',
+    'san diego': 'America/Los_Angeles',
+    'dallas': 'America/Chicago',
+    'san jose': 'America/Los_Angeles',
+    'austin': 'America/Chicago',
+    'seattle': 'America/Los_Angeles',
+    'denver': 'America/Denver',
+    'boston': 'America/New_York',
+    'miami': 'America/New_York',
+    'atlanta': 'America/New_York',
+    'toronto': 'America/Toronto',
+    'vancouver': 'America/Vancouver',
+    'montreal': 'America/Montreal',
+    'mexico city': 'America/Mexico_City',
+    
+    // Europe
+    'london': 'Europe/London',
+    'paris': 'Europe/Paris',
+    'berlin': 'Europe/Berlin',
+    'madrid': 'Europe/Madrid',
+    'rome': 'Europe/Rome',
+    'amsterdam': 'Europe/Amsterdam',
+    'brussels': 'Europe/Brussels',
+    'vienna': 'Europe/Vienna',
+    'stockholm': 'Europe/Stockholm',
+    'dublin': 'Europe/Dublin',
+    'lisbon': 'Europe/Lisbon',
+    'moscow': 'Europe/Moscow',
+    'athens': 'Europe/Athens',
+    'prague': 'Europe/Prague',
+    'budapest': 'Europe/Budapest',
+    'warsaw': 'Europe/Warsaw',
+    
+    // Asia
+    'tokyo': 'Asia/Tokyo',
+    'beijing': 'Asia/Shanghai',
+    'shanghai': 'Asia/Shanghai',
+    'hong kong': 'Asia/Hong_Kong',
+    'singapore': 'Asia/Singapore',
+    'dubai': 'Asia/Dubai',
+    'mumbai': 'Asia/Kolkata',
+    'delhi': 'Asia/Kolkata',
+    'bangalore': 'Asia/Kolkata',
+    'bangkok': 'Asia/Bangkok',
+    'jakarta': 'Asia/Jakarta',
+    'manila': 'Asia/Manila',
+    'kuala lumpur': 'Asia/Kuala_Lumpur',
+    'seoul': 'Asia/Seoul',
+    'taipei': 'Asia/Taipei',
+    'ho chi minh': 'Asia/Ho_Chi_Minh',
+    'karachi': 'Asia/Karachi',
+    'istanbul': 'Europe/Istanbul',
+    'tehran': 'Asia/Tehran',
+    'riyadh': 'Asia/Riyadh',
+    
+    // Australia & Oceania
+    'sydney': 'Australia/Sydney',
+    'melbourne': 'Australia/Melbourne',
+    'brisbane': 'Australia/Brisbane',
+    'perth': 'Australia/Perth',
+    'auckland': 'Pacific/Auckland',
+    
+    // South America
+    'sao paulo': 'America/Sao_Paulo',
+    'buenos aires': 'America/Argentina/Buenos_Aires',
+    'rio de janeiro': 'America/Sao_Paulo',
+    'lima': 'America/Lima',
+    'bogota': 'America/Bogota',
+    'santiago': 'America/Santiago',
+    
+    // Africa
+    'cairo': 'Africa/Cairo',
+    'lagos': 'Africa/Lagos',
+    'johannesburg': 'Africa/Johannesburg',
+    'nairobi': 'Africa/Nairobi',
+    'casablanca': 'Africa/Casablanca',
+  };
+
+  const getTimezone = (cityName) => {
+    const normalizedName = cityName.toLowerCase().trim();
+    return cityTimezoneMap[normalizedName] || 'UTC';
+  };
+
   const addCity = (e) => {
     e.preventDefault();
-    if (newCityName.trim() && newCityTimezone.trim()) {
+    if (newCityName.trim()) {
+      const timezone = getTimezone(newCityName);
       const newCity = {
         id: Date.now(),
         name: newCityName.trim(),
-        timezone: newCityTimezone.trim()
+        timezone: timezone
       };
       setCities([...cities, newCity]);
       setNewCityName('');
-      setNewCityTimezone('');
       setShowAddForm(false);
     }
   };
-
-  // Common timezones for quick reference
-  const commonTimezones = [
-    { label: 'New York (EST)', value: 'America/New_York' },
-    { label: 'Los Angeles (PST)', value: 'America/Los_Angeles' },
-    { label: 'Chicago (CST)', value: 'America/Chicago' },
-    { label: 'Denver (MST)', value: 'America/Denver' },
-    { label: 'London (GMT)', value: 'Europe/London' },
-    { label: 'Paris (CET)', value: 'Europe/Paris' },
-    { label: 'Berlin (CET)', value: 'Europe/Berlin' },
-    { label: 'Moscow (MSK)', value: 'Europe/Moscow' },
-    { label: 'Dubai (GST)', value: 'Asia/Dubai' },
-    { label: 'Mumbai (IST)', value: 'Asia/Kolkata' },
-    { label: 'Singapore (SGT)', value: 'Asia/Singapore' },
-    { label: 'Hong Kong (HKT)', value: 'Asia/Hong_Kong' },
-    { label: 'Tokyo (JST)', value: 'Asia/Tokyo' },
-    { label: 'Sydney (AEST)', value: 'Australia/Sydney' },
-    { label: 'Auckland (NZST)', value: 'Pacific/Auckland' },
-  ];
 
   const formatTime = (timezone) => {
     return currentTime.toLocaleTimeString('en-US', {
@@ -114,30 +186,12 @@ export default function App() {
                   type="text"
                   value={newCityName}
                   onChange={(e) => setNewCityName(e.target.value)}
-                  placeholder="e.g., Paris, London, Dubai"
+                  placeholder="e.g., Paris, London, Dubai, Sydney"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Timezone
-                </label>
-                <select
-                  value={newCityTimezone}
-                  onChange={(e) => setNewCityTimezone(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select a timezone</option>
-                  {commonTimezones.map((tz) => (
-                    <option key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </option>
-                  ))}
-                </select>
                 <p className="mt-2 text-xs text-gray-500">
-                  Or enter a custom timezone like: America/New_York, Europe/Paris, Asia/Tokyo
+                  Timezone will be automatically detected for major cities
                 </p>
               </div>
               <div className="flex gap-3">
@@ -152,7 +206,6 @@ export default function App() {
                   onClick={() => {
                     setShowAddForm(false);
                     setNewCityName('');
-                    setNewCityTimezone('');
                   }}
                   className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
                 >
