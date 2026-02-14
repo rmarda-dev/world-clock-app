@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Plus, X } from 'lucide-react';
 
 export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [cities, setCities] = useState([
+    { id: 1, name: 'New York', timezone: 'America/New_York' },
+    { id: 2, name: 'Seattle', timezone: 'America/Los_Angeles' },
+    { id: 3, name: 'Mumbai', timezone: 'Asia/Kolkata' },
+    { id: 4, name: 'Tokyo', timezone: 'Asia/Tokyo' }
+  ]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newCityName, setNewCityName] = useState('');
+  const [newCityTimezone, setNewCityTimezone] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -12,11 +21,42 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const cities = [
-    { name: 'New York', timezone: 'America/New_York' },
-    { name: 'Seattle', timezone: 'America/Los_Angeles' },
-    { name: 'Mumbai', timezone: 'Asia/Kolkata' },
-    { name: 'Tokyo', timezone: 'Asia/Tokyo' }
+  const removeCity = (cityId) => {
+    setCities(cities.filter(city => city.id !== cityId));
+  };
+
+  const addCity = (e) => {
+    e.preventDefault();
+    if (newCityName.trim() && newCityTimezone.trim()) {
+      const newCity = {
+        id: Date.now(),
+        name: newCityName.trim(),
+        timezone: newCityTimezone.trim()
+      };
+      setCities([...cities, newCity]);
+      setNewCityName('');
+      setNewCityTimezone('');
+      setShowAddForm(false);
+    }
+  };
+
+  // Common timezones for quick reference
+  const commonTimezones = [
+    { label: 'New York (EST)', value: 'America/New_York' },
+    { label: 'Los Angeles (PST)', value: 'America/Los_Angeles' },
+    { label: 'Chicago (CST)', value: 'America/Chicago' },
+    { label: 'Denver (MST)', value: 'America/Denver' },
+    { label: 'London (GMT)', value: 'Europe/London' },
+    { label: 'Paris (CET)', value: 'Europe/Paris' },
+    { label: 'Berlin (CET)', value: 'Europe/Berlin' },
+    { label: 'Moscow (MSK)', value: 'Europe/Moscow' },
+    { label: 'Dubai (GST)', value: 'Asia/Dubai' },
+    { label: 'Mumbai (IST)', value: 'Asia/Kolkata' },
+    { label: 'Singapore (SGT)', value: 'Asia/Singapore' },
+    { label: 'Hong Kong (HKT)', value: 'Asia/Hong_Kong' },
+    { label: 'Tokyo (JST)', value: 'Asia/Tokyo' },
+    { label: 'Sydney (AEST)', value: 'Australia/Sydney' },
+    { label: 'Auckland (NZST)', value: 'Pacific/Auckland' },
   ];
 
   const formatTime = (timezone) => {
@@ -50,13 +90,96 @@ export default function App() {
           <p className="text-gray-600">Current time across the globe</p>
         </div>
 
+        {/* Add City Button */}
+        <div className="mb-6 flex justify-center">
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition shadow-md"
+          >
+            <Plus className="w-5 h-5" />
+            Add City
+          </button>
+        </div>
+
+        {/* Add City Form */}
+        {showAddForm && (
+          <div className="mb-8 bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Add New City</h3>
+            <form onSubmit={addCity} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  City Name
+                </label>
+                <input
+                  type="text"
+                  value={newCityName}
+                  onChange={(e) => setNewCityName(e.target.value)}
+                  placeholder="e.g., Paris, London, Dubai"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Timezone
+                </label>
+                <select
+                  value={newCityTimezone}
+                  onChange={(e) => setNewCityTimezone(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select a timezone</option>
+                  {commonTimezones.map((tz) => (
+                    <option key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-gray-500">
+                  Or enter a custom timezone like: America/New_York, Europe/Paris, Asia/Tokyo
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Add City
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewCityName('');
+                    setNewCityTimezone('');
+                  }}
+                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* City Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {cities.map((city) => (
             <div
-              key={city.name}
-              className="bg-white rounded-2xl shadow-lg p-6 transform transition hover:scale-105"
+              key={city.id}
+              className="bg-white rounded-2xl shadow-lg p-6 transform transition hover:scale-105 relative"
             >
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              {/* Remove Button */}
+              <button
+                onClick={() => removeCity(city.id)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"
+                title="Remove city"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 pr-8">
                 {city.name}
               </h2>
               <div className="space-y-2">
@@ -70,6 +193,15 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        {/* Empty State */}
+        {cities.length === 0 && (
+          <div className="text-center py-12">
+            <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No cities added yet</p>
+            <p className="text-gray-400 text-sm">Click "Add City" to get started</p>
+          </div>
+        )}
       </div>
     </div>
   );
